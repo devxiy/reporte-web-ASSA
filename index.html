@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASSA · Reporte Estrategia 2026 — XIY</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@400;500&family=Quicksand:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#2f3846;
+  --bg2:#384353;
+  --bg3:#3d4858;
+  --bg4:#4d586a;
+  --brd:rgba(255,255,255,0.08);
+  --brd2:rgba(255,255,255,0.14);
+  --txt:#ffffff;
+  --txt2:#c8ccd5;
+  --txt3:#8a93a4;
+  --acc:#ff2703;
+  --acc-soft:#ffb4a7;
+  --blue:#8ab9ff;
+  --grn:#b8e4a3;
+  --gold:#f5c842;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;width:100%;}
+body{
+  background:var(--bg);color:var(--txt);
+  font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+.hdr{
+  position:sticky;top:0;left:0;right:0;height:54px;
+  background:rgba(47,56,70,0.95);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;z-index:100;
+}
+.hdr-l{display:flex;align-items:center;gap:16px;}
+.hdr-x{font-family:'DM Mono',monospace;font-size:14px;color:var(--txt3);font-weight:400;}
+.la{font-size:14px;font-weight:600;letter-spacing:1.5px;color:var(--txt);}
+.sep{width:1px;height:18px;background:var(--brd2);}
+.hdr-meta{font-size:11px;color:var(--txt3);letter-spacing:0.04em;font-family:'DM Mono',monospace;}
+
+.container{max-width:1280px;margin:0 auto;padding:48px 72px;}
+
+.cover-section{margin-bottom:60px;padding:60px 0;}
+h1{font-size:46px;font-weight:600;line-height:1.05;margin-bottom:18px;letter-spacing:-0.025em;}
+h2{font-size:30px;font-weight:600;line-height:1.15;margin-bottom:14px;letter-spacing:-0.015em;}
+.lead{font-size:18px;color:var(--txt2);font-weight:300;line-height:1.55;margin-bottom:28px;max-width:920px;font-style:italic;}
+.lead strong{color:var(--gold);}
+
+.tab-nav{
+  display:flex;gap:12px;margin-bottom:40px;border-bottom:1px solid var(--brd);
+  padding-bottom:0;
+}
+.tab-btn{
+  background:transparent;color:var(--txt2);border:none;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  letter-spacing:0.08em;text-transform:uppercase;
+  padding:16px 24px;cursor:pointer;transition:all .2s;
+  border-bottom:2px solid transparent;
+}
+.tab-btn:hover{color:var(--txt);}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+.tab-content{display:none;}
+.tab-content.active{display:block;animation:fadeup .3s ease-out;}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px;}
+.kc{background:var(--bg3);border:1px solid var(--brd);border-radius:14px;padding:20px 22px;position:relative;overflow:hidden;}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);}
+.kl{font-size:10px;font-weight:500;color:var(--txt3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;font-family:'DM Mono',monospace;}
+.kv{font-size:32px;font-weight:600;color:var(--txt);line-height:1;margin-bottom:6px;font-family:'DM Mono',monospace;letter-spacing:-0.02em;}
+.ks{font-size:12px;color:var(--txt3);}
+
+.section-title{font-size:16px;font-weight:600;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:20px;font-family:'DM Mono',monospace;padding-bottom:12px;border-bottom:1px solid var(--brd);}
+
+.budget-wrap{background:var(--bg3);border:1px solid var(--brd);border-radius:14px;overflow:hidden;margin-bottom:32px;}
+.budget-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+.budget-table th{
+  text-align:left;font-size:10px;font-weight:500;color:var(--txt3);
+  letter-spacing:0.08em;text-transform:uppercase;padding:13px 16px;
+  background:var(--bg2);border-bottom:1px solid var(--brd);font-family:'DM Mono',monospace;
+}
+.budget-table td{padding:13px 16px;color:var(--txt2);border-bottom:1px solid var(--brd);}
+.budget-table tr:last-child td{border-bottom:none;}
+.budget-table tr:hover td{background:var(--bg4);}
+.budget-table td.cat{font-weight:600;color:var(--txt);}
+.budget-table td.num{font-family:'DM Mono',monospace;font-size:13px;color:var(--txt);}
+
+/* TABLA DINÁMICA */
+.brand-row{cursor:pointer;user-select:none;transition:all .2s;background:rgba(138,185,255,0.15);}
+.brand-row:hover{background:rgba(138,185,255,0.25);}
+.brand-row td{padding:14px 16px !important;font-weight:700;color:var(--gold);}
+.city-row{display:none;background:rgba(138,185,255,0.06);}
+.city-row.open{display:table-row;}
+.city-row td{padding:12px 16px 12px 40px !important;font-weight:600;cursor:pointer;transition:all .2s;}
+.city-row:hover td{background:rgba(138,185,255,0.12);}
+.model-row{display:none;background:rgba(138,185,255,0.02);}
+.model-row.open{display:table-row;}
+.model-row td:first-child{padding-left:70px !important;font-size:12px;color:var(--txt2);}
+.toggle{display:inline-block;width:20px;height:20px;background:var(--blue);color:#1a1a1a;border-radius:4px;font-weight:700;text-align:center;line-height:20px;margin-right:10px;transition:all .2s;font-size:12px;}
+.toggle.open{transform:rotate(90deg);}
+.results-badge{display:inline-block;background:var(--blue);color:#1a1a1a;padding:4px 10px;border-radius:6px;font-weight:700;font-size:13px;}
+.total-row td{background:rgba(245,200,66,0.06);border-top:1px solid rgba(245,200,66,0.3);font-weight:600;color:var(--gold) !important;}
+
+.charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:32px;}
+.chart-box{background:var(--bg3);border:1px solid var(--brd);border-radius:14px;padding:24px;position:relative;height:360px;}
+.chart-title{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:20px;}
+
+.insights-box{background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.28);border-radius:14px;padding:24px;margin-bottom:40px;}
+.insights-box .section-title{border:none;margin-bottom:16px;}
+.insights-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.insight-item{padding:12px 0;border-bottom:1px solid rgba(245,200,66,0.14);font-size:13px;}
+.insight-item:last-child{border-bottom:none;}
+.insight-item strong{color:var(--gold);}
+
+.footer{text-align:center;padding:40px 0;font-size:12px;color:var(--txt3);border-top:1px solid var(--brd);margin-top:40px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-l">
+    <span class="la">ASSA</span>
+    <div class="sep"></div>
+    <span class="hdr-x">XIY</span>
+  </div>
+  <div class="hdr-meta">Reporte de Desempeño De Campañas</div>
+</header>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="container">
+
+  <!-- PORTADA -->
+  <div class="cover-section">
+    <h1>ASSA 2026 CAMPAÑAS DE META AL FORMULARIO WEB</h1>
+    <p class="lead">Análisis completo de resultados por marca, canales de adquisición y performance de inversión publicitaria. Datos del 11 de mayo al <strong>21 de mayo 2026.</strong></p>
+  </div>
+
+  <!-- MÉTRICAS CLAVE GLOBALES -->
+  <div style="margin-bottom:48px;">
+    <div class="section-title">01 · Métricas Clave</div>
+    <div class="metrics-grid">
+      <div class="kc">
+        <div class="kl">Usuarios Activos</div>
+        <div class="kv">7,9 mil</div>
+        <div class="ks">↑ 189,5% vs período anterior</div>
+      </div>
+      <div class="kc">
+        <div class="kl">Número de Eventos</div>
+        <div class="kv">47 mil</div>
+        <div class="ks">↑ 208,9% vs período anterior</div>
+      </div>
+      <div class="kc">
+        <div class="kl">Eventos Clave</div>
+        <div class="kv">19 mil</div>
+        <div class="ks">↑ 641,5% vs período anterior</div>
+      </div>
+      <div class="kc">
+        <div class="kl">Gasto en Herramientas</div>
+        <div class="kv">$2.099,60</div>
+        <div class="ks">invertidos en plataformas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('performance')">📊 Performance Marcas</button>
+    <button class="tab-btn" onclick="showTab('rendimiento')">📈 Rendimiento Web</button>
+  </div>
+
+  <!-- TAB 1: PERFORMANCE MARCAS -->
+  <div id="performance" class="tab-content active">
+    <div class="section-title">02 · Desempeño por Marca (Click para expandir)</div>
+    <div class="budget-wrap">
+      <table class="budget-table">
+        <thead>
+          <tr>
+            <th>Marca</th>
+            <th>Ciudad</th>
+            <th>Resultados</th>
+            <th>CPL</th>
+            <th>Gasto en Herramienta</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- INSIGHTS PERFORMANCE -->
+    <div class="insights-box">
+      <div class="section-title">Insights Performance</div>
+      <div class="insights-grid">
+        <div class="insight-item"><strong>→ Mejor rendimiento:</strong> Mercedes lidera con CPL más bajo ($7,08)</div>
+        <div class="insight-item"><strong>→ Zona norte sobresale:</strong> Chevrolet Zona Norte con 31 resultados</div>
+        <div class="insight-item"><strong>→ CPL más alto:</strong> GAC con $47,76 requiere optimización</div>
+        <div class="insight-item"><strong>→ Presupuesto total:</strong> $2.099,60 invertidos en herramientas</div>
+        <div class="insight-item"><strong>→ Mejor ratio:</strong> Chevrolet Pesados Centro con $8,83 CPL</div>
+        <div class="insight-item"><strong>→ Conversiones totales:</strong> 129 resultados en todo el portfolio</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: RENDIMIENTO WEB -->
+  <div id="rendimiento" class="tab-content">
+    <div class="section-title">02 · Analytics y Eventos Web</div>
+
+    <!-- GRÁFICOS -->
+    <div class="charts-grid">
+      <div class="chart-box">
+        <div class="chart-title">Sesiones por Canal (Últimos 7 días)</div>
+        <canvas id="sessionsChart" height="300"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Usuarios por Primera Fuente</div>
+        <canvas id="usersChart" height="300"></canvas>
+      </div>
+    </div>
+
+    <!-- TABLA CANALES -->
+    <div style="margin-bottom:32px;">
+      <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:16px;">Sesiones por Grupo de Canales</div>
+      <div class="budget-wrap">
+        <table class="budget-table">
+          <thead>
+            <tr>
+              <th>Canal</th>
+              <th>Sesiones</th>
+              <th>% del Total</th>
+              <th>Cambio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cat">Paid Social</td>
+              <td class="num">5.700</td>
+              <td class="num">68,2%</td>
+              <td class="num" style="color:var(--grn);">↑ 157,2%</td>
+            </tr>
+            <tr>
+              <td class="cat">Paid Other</td>
+              <td class="num">2.500</td>
+              <td class="num">29,9%</td>
+              <td class="num" style="color:var(--grn);">↑ 30,97%</td>
+            </tr>
+            <tr>
+              <td class="cat">Paid Search</td>
+              <td class="num">1.100</td>
+              <td class="num">13,1%</td>
+              <td class="num" style="color:var(--grn);">↑ 68,0%</td>
+            </tr>
+            <tr>
+              <td class="cat">Display</td>
+              <td class="num">477</td>
+              <td class="num">5,7%</td>
+              <td class="num" style="color:var(--grn);">↑ 454,7%</td>
+            </tr>
+            <tr class="total-row">
+              <td class="cat">TOTAL SESIONES</td>
+              <td class="num">8.365</td>
+              <td class="num">100%</td>
+              <td class="num" style="color:var(--gold);">↑ Promedio</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FUNNEL DE CONVERSIÓN COMPACTO -->
+    <div style="margin-bottom:40px;">
+      <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:20px;">Embudo de Conversión - Flujo de Usuarios</div>
+      <div style="background:var(--bg3);border:1px solid var(--brd);border-radius:14px;padding:32px 24px;overflow:hidden;">
+        <div style="max-width:700px;margin:0 auto;">
+          
+          <!-- STEP 1 -->
+          <div style="margin-bottom:16px;text-align:center;">
+            <div style="background:rgba(138,185,255,0.2);border-left:4px solid var(--blue);padding:14px 20px;border-radius:8px;display:inline-block;min-width:350px;position:relative;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;">
+                <div style="text-align:left;flex:1;">
+                  <div style="font-weight:700;color:var(--txt);font-size:14px;">Visitantes en el sitio</div>
+                  <div style="font-size:9px;color:var(--txt3);margin-top:3px;font-family:'DM Mono',monospace;">page_view</div>
+                </div>
+                <div style="font-size:28px;font-weight:700;color:var(--blue);font-family:'DM Mono',monospace;">83.118</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARROW & LABEL -->
+          <div style="text-align:center;margin:8px 0;">
+            <div style="font-size:11px;color:var(--acc);font-weight:600;">↓ 22,3%</div>
+          </div>
+
+          <!-- STEP 2 -->
+          <div style="margin-bottom:16px;text-align:center;">
+            <div style="background:rgba(138,185,255,0.15);border-left:4px solid var(--blue);padding:12px 20px;border-radius:8px;display:inline-block;min-width:300px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;">
+                <div style="text-align:left;flex:1;">
+                  <div style="font-weight:700;color:var(--txt);font-size:13px;">Sesiones iniciadas</div>
+                  <div style="font-size:9px;color:var(--txt3);margin-top:2px;font-family:'DM Mono',monospace;">session_start</div>
+                </div>
+                <div style="font-size:24px;font-weight:700;color:var(--blue);font-family:'DM Mono',monospace;">18.534</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARROW & LABEL -->
+          <div style="text-align:center;margin:8px 0;">
+            <div style="font-size:11px;color:var(--acc);font-weight:600;">↓ 17,28%</div>
+          </div>
+
+          <!-- STEP 3 -->
+          <div style="margin-bottom:16px;text-align:center;">
+            <div style="background:rgba(138,185,255,0.12);border-left:4px solid var(--blue);padding:11px 20px;border-radius:8px;display:inline-block;min-width:280px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;">
+                <div style="text-align:left;flex:1;">
+                  <div style="font-weight:700;color:var(--txt);font-size:12px;">Primeras visitas</div>
+                  <div style="font-size:9px;color:var(--txt3);margin-top:2px;font-family:'DM Mono',monospace;">first_visit</div>
+                </div>
+                <div style="font-size:22px;font-weight:700;color:var(--blue);font-family:'DM Mono',monospace;">14.365</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARROW & LABEL -->
+          <div style="text-align:center;margin:8px 0;">
+            <div style="font-size:11px;color:var(--acc);font-weight:600;">↓ 14,66%</div>
+          </div>
+
+          <!-- STEP 4 -->
+          <div style="margin-bottom:16px;text-align:center;">
+            <div style="background:rgba(138,185,255,0.10);border-left:4px solid var(--blue);padding:10px 20px;border-radius:8px;display:inline-block;min-width:240px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;">
+                <div style="text-align:left;flex:1;">
+                  <div style="font-weight:700;color:var(--txt);font-size:12px;">Productos vistos</div>
+                  <div style="font-size:9px;color:var(--txt3);margin-top:2px;font-family:'DM Mono',monospace;">view_item</div>
+                </div>
+                <div style="font-size:20px;font-weight:700;color:var(--blue);font-family:'DM Mono',monospace;">12.187</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARROW & LABEL -->
+          <div style="text-align:center;margin:8px 0;">
+            <div style="font-size:11px;color:var(--gold);font-weight:600;">↓ 3,73%</div>
+          </div>
+
+          <!-- STEP 5 -->
+          <div style="margin-bottom:16px;text-align:center;">
+            <div style="background:rgba(245,200,66,0.12);border-left:4px solid var(--gold);padding:10px 20px;border-radius:8px;display:inline-block;min-width:200px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;">
+                <div style="text-align:left;flex:1;">
+                  <div style="font-weight:700;color:var(--txt);font-size:12px;">Filtrados por marca</div>
+                  <div style="font-size:9px;color:var(--txt3);margin-top:2px;font-family:'DM Mono',monospace;">filter_marca</div>
+                </div>
+                <div style="font-size:18px;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace;">3.100</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARROW & LABEL -->
+          <div style="text-align:center;margin:8px 0;">
+            <div style="font-size:11px;color:var(--acc);font-weight:600;">↓ 0,54%</div>
+          </div>
+
+          <!-- STEP 6 - FINAL -->
+          <div style="margin-bottom:0;text-align:center;">
+            <div style="background:rgba(255,39,3,0.15);border-left:4px solid var(--acc);padding:12px 20px;border-radius:8px;display:inline-block;min-width:180px;box-shadow:0 4px 12px rgba(255,39,3,0.15);">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;">
+                <div style="text-align:left;flex:1;">
+                  <div style="font-weight:700;color:var(--acc);font-size:12px;">🎯 Solicitudes de cotización</div>
+                  <div style="font-size:9px;color:var(--txt3);margin-top:2px;font-family:'DM Mono',monospace;">click_cotizar</div>
+                </div>
+                <div style="font-size:22px;font-weight:700;color:var(--acc);font-family:'DM Mono',monospace;">449</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS WEB -->
+    <div class="insights-box">
+      <div class="section-title">Insights Rendimiento Web</div>
+      <div class="insights-grid">
+        <div class="insight-item"><strong>→ Canal dominante:</strong> Paid Social con 68,2% de sesiones (5.700)</div>
+        <div class="insight-item"><strong>→ Mayor crecimiento:</strong> Display con ↑454,7% vs período anterior</div>
+        <div class="insight-item"><strong>→ Top usuarios:</strong> Facebook Paid con 6.000 usuarios activos</div>
+        <div class="insight-item"><strong>→ Cuello botella:</strong> view_item al 14,66% requiere optimización</div>
+        <div class="insight-item"><strong>→ Eventos críticos:</strong> Sessions y first_visit con tasas >99%</div>
+        <div class="insight-item"><strong>→ Clicks bajos:</strong> Solo 950 clicks (1,14%) indica fricción en CTA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div style="margin-bottom:12px;">ASSA × XIY · Reporte de Desempeño</div>
+    <div style="font-size:11px;color:var(--txt3);">Datos al 21 de mayo 2026 · Estrategia Global 2026</div>
+  </div>
+
+</div>
+
+<script>
+// DATOS JERÁRQUICOS
+const data = [
+  {
+    name: "Chevrolet Livianos - Zona Centro",
+    results: 19,
+    cpl: "$20,02",
+    gasto: "$380,34",
+    cities: [
+      { name: "Ambato", results: 8, models: [{ name: "D-max", results: 8 }, { name: "Groove", results: 2 }] },
+      { name: "Latacunga", results: 5, models: [{ name: "D-max", results: 3 }, { name: "Groove", results: 2 }] },
+      { name: "Riobamba", results: 2, models: [{ name: "D-max", results: 2 }] },
+      { name: "Puyo", results: 2, models: [{ name: "D-max", results: 2 }] }
+    ]
+  },
+  {
+    name: "Chevrolet Livianos - Zona Norte",
+    results: 31,
+    cpl: "$11,87",
+    gasto: "$367,97",
+    cities: [
+      { name: "Imbabura/Carchi", results: 6, models: [{ name: "D-max", results: 6 }] },
+      { name: "Oriente (Coca-Lago Agrio)", results: 10, models: [{ name: "D-max", results: 10 }] }
+    ]
+  },
+  {
+    name: "Chevrolet Pesados - Zona Centro",
+    results: 21,
+    cpl: "$8,83",
+    gasto: "$185,47",
+    cities: [
+      { name: "Ambato", results: 10, models: [{ name: "Serie N", results: 8 }, { name: "Serie F", results: 2 }] },
+      { name: "Riobamba", results: 8, models: [{ name: "Serie N", results: 6 }, { name: "Serie F", results: 2 }] },
+      { name: "Puyo - Latacunga", results: 3, models: [{ name: "Serie N", results: 1 }, { name: "Serie F", results: 2 }] }
+    ]
+  },
+  {
+    name: "Chevrolet Pesados - Zona Norte",
+    results: 9,
+    cpl: "$16,70",
+    gasto: "$150,32",
+    cities: [
+      { name: "Imbabura", results: 9, models: [{ name: "Serie N", results: 2 }, { name: "Serie F", results: 7 }] }
+    ]
+  },
+  {
+    name: "Volkswagen",
+    results: 13,
+    cpl: "$26,64",
+    gasto: "$346,34",
+    cities: [
+      { name: "Ambato", results: 4, models: [{ name: "T-Cross", results: 4 }] },
+      { name: "Quito", results: 9, models: [{ name: "T-Cross", results: 2 }, { name: "Saveiro/Polo", results: 4 }, { name: "Tera", results: 3 }] }
+    ]
+  },
+  {
+    name: "ISUZU",
+    results: 10,
+    cpl: "$14,47",
+    gasto: "$144,65",
+    cities: [
+      { name: "Ambato", results: 6, models: [{ name: "4X2TMRBB", results: 6 }] },
+      { name: "Riobamba", results: 4, models: [{ name: "4X2TMRBB", results: 3 }, { name: "4X4TMRBB", results: 1 }] }
+    ]
+  },
+  {
+    name: "GAC",
+    results: 6,
+    cpl: "$47,76",
+    gasto: "$286,56",
+    cities: [
+      { name: "Ibarra", results: 6, models: [{ name: "Emzoom", results: 2 }, { name: "GS3", results: 4 }] }
+    ]
+  },
+  {
+    name: "MG",
+    results: 9,
+    cpl: "$14,66",
+    gasto: "$131,90",
+    cities: [
+      { name: "Ambato", results: 3, models: [{ name: "ZS", results: 1 }, { name: "MG5", results: 2 }] },
+      { name: "Riobamba", results: 3, models: [{ name: "ZS", results: 0 }, { name: "MG5", results: 3 }] },
+      { name: "Latacunga", results: 3, models: [{ name: "ZS", results: 1 }, { name: "MG5", results: 2 }] }
+    ]
+  },
+  {
+    name: "Mercedes",
+    results: 10,
+    cpl: "$7,08",
+    gasto: "$70,83",
+    cities: [
+      { name: "Pichincha", results: 10, models: [{ name: "Arocs", results: 2 }, { name: "Sprinter", results: 5 }, { name: "Actros", results: 3 }] }
+    ]
+  },
+  {
+    name: "Subaru",
+    results: 1,
+    cpl: "$35,22",
+    gasto: "$35,22",
+    cities: [
+      { name: "Ambato", results: 1, models: [{ name: "Crosstek", results: 1 }] }
+    ]
+  }
+];
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  let html = '';
+
+  data.forEach((brand, bIdx) => {
+    // BRAND ROW
+    html += `
+      <tr class="brand-row" onclick="toggleBrand(${bIdx})">
+        <td><span class="toggle">▶</span>${brand.name}</td>
+        <td></td>
+        <td class="num" style="text-align:center;"><span class="results-badge">${brand.results}</span></td>
+        <td class="num">${brand.cpl}</td>
+        <td class="num">${brand.gasto}</td>
+      </tr>
+    `;
+
+    // CITY ROWS
+    brand.cities.forEach((city, cIdx) => {
+      html += `
+        <tr class="city-row" data-brand="${bIdx}" data-city="${cIdx}" onclick="toggleCity(event, ${bIdx}, ${cIdx})">
+          <td style="padding-left:40px;"><span class="toggle">▶</span>${city.name}</td>
+          <td></td>
+          <td class="num" style="text-align:center;"><span class="results-badge">${city.results}</span></td>
+          <td></td>
+          <td></td>
+        </tr>
+      `;
+
+      // MODEL ROWS
+      city.models.forEach((model) => {
+        html += `
+          <tr class="model-row" data-brand="${bIdx}" data-city="${cIdx}">
+            <td style="padding-left:70px;color:var(--txt2);">${model.name}</td>
+            <td></td>
+            <td class="num" style="text-align:center;"><span class="results-badge">${model.results}</span></td>
+            <td></td>
+            <td></td>
+          </tr>
+        `;
+      });
+    });
+  });
+
+  // TOTAL ROW
+  html += `
+    <tr class="total-row">
+      <td style="color:var(--gold);"><strong>TOTAL GENERAL</strong></td>
+      <td></td>
+      <td class="num" style="text-align:center;"><strong>129</strong></td>
+      <td class="num"><strong>$16,28</strong></td>
+      <td class="num"><strong>$2.099,60</strong></td>
+    </tr>
+  `;
+
+  tbody.innerHTML = html;
+}
+
+function toggleBrand(bIdx) {
+  const cityRows = document.querySelectorAll(`.city-row[data-brand="${bIdx}"]`);
+  cityRows.forEach(row => {
+    row.classList.toggle('open');
+    const cIdx = row.dataset.city;
+    document.querySelectorAll(`.model-row[data-brand="${bIdx}"][data-city="${cIdx}"]`).forEach(m => m.classList.remove('open'));
+  });
+  
+  const toggle = event.target.closest('.brand-row').querySelector('.toggle');
+  toggle.classList.toggle('open');
+}
+
+function toggleCity(evt, bIdx, cIdx) {
+  evt.stopPropagation();
+  const modelRows = document.querySelectorAll(`.model-row[data-brand="${bIdx}"][data-city="${cIdx}"]`);
+  modelRows.forEach(row => row.classList.toggle('open'));
+  
+  const toggle = evt.target.closest('.city-row').querySelector('.toggle');
+  toggle.classList.toggle('open');
+}
+
+function showTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// GRÁFICOS
+const sessionsCtx = document.getElementById('sessionsChart').getContext('2d');
+new Chart(sessionsCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Paid Social', 'Paid Other', 'Paid Search', 'Display', 'Organic & Direct'],
+    datasets: [{
+      data: [5700, 2500, 1100, 477, 388],
+      backgroundColor: ['#8ab9ff','#ffb4a7','#f5c842','#b8e4a3','#8a93a4'],
+      borderColor: '#2f3846',
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    aspectRatio: 1.2,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11, family: "'DM Sans', sans-serif" }, color: '#c8ccd5', padding: 12 } } }
+  }
+});
+
+const usersCtx = document.getElementById('usersChart').getContext('2d');
+new Chart(usersCtx, {
+  type: 'bar',
+  data: {
+    labels: ['Facebook\nPaid', 'Google\nCPC', 'AN Paid', 'No Data', 'TikTok'],
+    datasets: [{
+      label: 'Usuarios',
+      data: [6000, 3900, 1700, 686, 465],
+      backgroundColor: ['#8ab9ff','#ffb4a7','#f5c842','#8a93a4','#c8b4ff'],
+      borderRadius: 8,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'x',
+    responsive: true,
+    maintainAspectRatio: true,
+    aspectRatio: 1.8,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, max: 7000, ticks: { color: '#8a93a4', font: { size: 10 } }, grid: { color: '#384353' } },
+      x: { ticks: { color: '#8a93a4', font: { size: 10 } }, grid: { display: false } }
+    }
+  }
+});
+
+// RENDERIZAR TABLA
+renderTable();
+</script>
+
+</body>
+</html>
